@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Invoice Extraction</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4338ca;
+            --accent: #f472b6;
+            --bg: #e4f266;
+            --card-bg: #fff;
+            --border: #e5e7eb;
+            --shadow: 0 4px 24px rgba(99,102,241,0.08);
+            --radius: 18px;
+        }
+        body {
+            font-family: 'Inter', Arial, sans-serif;
+            background: var(--bg);
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+        }
+        h2 {
+            text-align: center;
+            color: var(--primary);
+            margin-top: 40px;
+            font-size: 2.2rem;
+            letter-spacing: -1px;
+        }
+        .container {
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 0 16px;
+        }
+        .card {
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 32px 28px;
+            margin-bottom: 32px;
+            border: 1px solid var(--border);
+            transition: box-shadow 0.2s;
+        }
+        .card:hover {
+            box-shadow: 0 8px 32px rgba(99,102,241,0.13);
+        }
+        label {
+            display: block;
+            margin-top: 18px;
+            font-weight: 600;
+            color: #374151;
+            letter-spacing: 0.01em;
+        }
+        input, textarea {
+            width: 100%;
+            padding: 12px 14px;
+            margin-top: 7px;
+            border-radius: 10px;
+            border: 1.5px solid var(--border);
+            background: #f3f4f6;
+            font-size: 1rem;
+            transition: border 0.2s, box-shadow 0.2s;
+            outline: none;
+            resize: vertical;
+        }
+        input:focus, textarea:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px #6366f133;
+        }
+        textarea {
+            min-height: 48px;
+            max-height: 120px;
+        }
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin-top: 18px;
+            background: #f9fafb;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        th, td {
+            padding: 12px 10px;
+            text-align: center;
+        }
+        th {
+            background: var(--primary);
+            color: #fff;
+            font-weight: 600;
+            border: none;
+        }
+        td {
+            border-bottom: 1px solid #e5e7eb;
+        }
+        tr:last-child td {
+            border-bottom: none;
+        }
+        .btn {
+            display: inline-block;
+            margin-top: 20px;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+            color: #fff;
+            padding: 12px 28px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 2px 8px #6366f122;
+            transition: background 0.2s, box-shadow 0.2s;
+        }
+        .btn:hover {
+            background: linear-gradient(90deg, var(--primary-dark), var(--accent));
+            box-shadow: 0 4px 16px #6366f144;
+        }
+        .btn-secondary {
+            background: #f3f4f6;
+            color: var(--primary);
+            border: 1.5px solid var(--primary);
+            margin-left: 8px;
+        }
+        .btn-secondary:hover {
+            background: #e0e7ff;
+        }
+        .flash {
+            margin: 10px 0 20px 0;
+            padding: 14px 18px;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 500;
+        }
+        .flash.success { background: #d1fae5; color: #065f46; }
+        .flash.danger { background: #fee2e2; color: #991b1b; }
+        @media (max-width: 700px) {
+            .card, .container { padding: 16px; }
+            th, td { font-size: 0.95rem; }
+        }
+    </style>
+</head>
+<body>
+
+<h2>Invoice Extraction <span style="font-size:1.2rem;color:#f472b6;">with AI</span></h2>
+
+<div class="container">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="flash {{ category }}">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <div class="card">
+        <form method="POST" enctype="multipart/form-data">
+            <label>Upload PDF</label>
+            <input type="file" name="pdf" required style="background:#fff;">
+            <button type="submit" class="btn" style="margin-top:12px;">Extract with AI</button>
+        </form>
+    </div>
+
+    <div class="card">
+        <form method="POST" action="/save">
+            <label>Shipper Name</label>
+            <textarea name="Shipper_Name">{{ data.Shipper_Name or '' }}</textarea>
+
+            <label>Billing Customer Name</label>
+            <textarea name="Billing_Customer_Name">{{ data.Billing_Customer_Name or '' }}</textarea>
+
+            <label>Consignee</label>
+            <textarea name="Consignee">{{ data.Consignee or '' }}</textarea>
+
+            <label>Invoice Number</label>
+            <input type="text" name="Invoice_No" value="{{ data.Invoice_No or '' }}">
+
+            <label>Invoice Date</label>
+            <input type="text" name="Invoice_Date" value="{{ data.Invoice_Date or '' }}">
+
+            <label>Buyers Order No</label>
+            <input type="text" name="Buyers_Order_No" value="{{ data.Buyers_Order_No or '' }}">
+
+            <label>IE CODE</label>
+            <input type="text" name="IE_CODE" value="{{ data.IE_CODE or '' }}">
+
+            <label>GSTIN</label>
+            <input type="text" name="GSTIN" value="{{ data.GSTIN or '' }}">
+
+            <label>Port of Loading</label>
+            <input type="text" name="Port_Loading" value="{{ data.Port_Loading or '' }}">
+
+            <label>Port of Discharge & Final Destination</label>
+            <input type="text" name="Port_Discharge_Final" value="{{ data.Port_Discharge_Final or '' }}">
+
+            <label>Notify Party</label>
+            <textarea name="Notify_Party">{{ data.Notify_Party or '' }}</textarea>
+
+            <label>Mode of Delivery</label>
+            <input type="text" name="Mode_of_Delivery" value="{{ data.Mode_of_Delivery or '' }}">
+
+            <label>Terms</label>
+            <input type="text" name="Terms" value="{{ data.Terms or '' }}">
+
+            <label>Container No</label>
+            <input type="text" name="Container_No" value="{{ data.Container_No or '' }}">
+
+            <label>Style No</label>
+            <input type="text" name="Style_No" value="{{ data.Style_No or '' }}">
+
+            <label>Total Amount</label>
+            <input type="text" name="Total_Amount" value="{{ data.Total_Amount or '' }}">
+
+            <label>Total Net Weight (KGs)</label>
+            <input type="text" name="Total_Net_Wt" value="{{ data.Total_Net_Wt or '' }}">
+
+            <label>Total Gross Weight (KGs)</label>
+            <input type="text" name="Total_Grs_Wt" value="{{ data.Total_Grs_Wt or '' }}">
+
+            <label>Total CBM</label>
+            <input type="text" name="Total_CBM" value="{{ data.Total_CBM or '' }}">
+
+            <h4 style="margin-top:32px;color:var(--primary);font-size:1.15rem;">Product Table</h4>
+            <table id="productTable">
+                <thead>
+                    <tr>
+                        <th>Description</th>
+                        <th>Quantity</th>
+                        <th>Rate</th>
+                        <th>Amount</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if data.Products %}
+                        {% for item in data.Products %}
+                        <tr>
+                            <td><input type="text" name="description[]" value="{{ item.description }}"></td>
+                            <td><input type="text" name="quantity[]" value="{{ item.quantity }}"></td>
+                            <td><input type="text" name="rate[]" value="{{ item.rate }}"></td>
+                            <td><input type="text" name="amount[]" value="{{ item.amount }}"></td>
+                            <td><button type="button" class="btn btn-secondary" onclick="removeRow(this)">Remove</button></td>
+                        </tr>
+                        {% endfor %}
+                    {% endif %}
+                </tbody>
+            </table>
+            <button type="button" class="btn btn-secondary" onclick="addRow()">Add Row</button>
+            <button type="submit" class="btn" style="float:right;">💾 Save</button>
+        </form>
+    </div>
+</div>
+
+<script>
+function addRow() {
+    const table = document.getElementById("productTable").getElementsByTagName('tbody')[0];
+    const row = table.insertRow();
+    row.innerHTML = `
+        <td><input type="text" name="description[]"></td>
+        <td><input type="text" name="quantity[]"></td>
+        <td><input type="text" name="rate[]"></td>
+        <td><input type="text" name="amount[]"></td>
+        <td><button type="button" class="btn btn-secondary" onclick="removeRow(this)">Remove</button></td>
+    `;
+}
+function removeRow(btn) {
+    const row = btn.parentNode.parentNode;
+    row.parentNode.removeChild(row);
+}
+</script>
+</body>
+</html>
